@@ -36,7 +36,7 @@ jobs:
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
           MODEL_NAME: ${{ secrets.MODEL_NAME || '' }}
         run: |
-          papermill GiveMeSomeCredit.ipynb output.GiveMeSomeCredit.ipynb
+          papermill GiveMeSomeCredit.ipynb output.GiveMeSomeCredit.ipynb -k python3
 
       - name: Upload executed notebook as artifact (for debugging)
         if: always()
