@@ -1,0 +1,70 @@
+name: Train & restart backend if model promoted
+
+on:
+  push:
+    paths:
+      - 'data/**'
+#      - 'src/backend/**'
+  workflow_dispatch:
+
+jobs:
+  train-and-restart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.0'
+
+      - name: Install python deps
+        working-directory: src/backend
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install papermill mlflow
+
+      - name: Run training notebook
+        id: run_notebook
+        working-directory: src/backend
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          MODEL_NAME: ${{ secrets.MODEL_NAME || '' }}
+        run: |
+          papermill GiveMeSomeCredit.ipynb output.GiveMeSomeCredit.ipynb
+
+      - name: Upload executed notebook as artifact (for debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: executed-notebook
+          path: src/backend/output.GiveMeSomeCredit.ipynb
+
+      - name: Check if model was promoted
+        id: check_promoted
+        working-directory: src/backend
+        run: |
+          if [ -f model_promotion_result.txt ] && grep -q PROMOTED model_promotion_result.txt; then
+            echo "promoted=true" >> $GITHUB_OUTPUT
+          else
+            echo "promoted=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Login to Azure
+        if: steps.check_promoted.outputs.promoted == 'true'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Restart backend Container App
+        if: steps.check_promoted.outputs.promoted == 'true'
+        env:
+          RESOURCE_GROUP: AdityasRG
+          CONTAINERAPP_NAME: credit-backend
+        run: |
+          az containerapp restart -g "$RESOURCE_GROUP" -n "$CONTAINERAPP_NAME"

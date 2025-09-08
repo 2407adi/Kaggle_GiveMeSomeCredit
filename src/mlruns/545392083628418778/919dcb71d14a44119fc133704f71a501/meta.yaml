@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/macbookpro/Documents/DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/mlruns/545392083628418778/919dcb71d14a44119fc133704f71a501/artifacts
+end_time: 1755770568244
+entry_point_name: ''
+experiment_id: '545392083628418778'
+lifecycle_stage: active
+run_id: 919dcb71d14a44119fc133704f71a501
+run_name: shivering-ray-46
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755770552932
+status: 4
+tags: []
+user_id: macbookpro

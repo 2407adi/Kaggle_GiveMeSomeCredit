@@ -1,0 +1,7 @@
+.venv/
+venv/
+venv/
+/Users/macbookpro/Documents/DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/backend/.env
+DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/frontend/.env
+/src/backend/.env
+/src/backend/az_login.json
