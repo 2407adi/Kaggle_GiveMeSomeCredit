@@ -30,12 +30,13 @@ jobs:
 
       - name: Run training notebook
         id: run_notebook
+        working-directory: src/backend
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
           MODEL_NAME: ${{ secrets.MODEL_NAME || '' }}
         run: |
-          papermill src/backend/GiveMeSomeCredit.ipynb src/backend/output.GiveMeSomeCredit.ipynb -k python3
+          papermill GiveMeSomeCredit.ipynb output.GiveMeSomeCredit.ipynb -k python3
 
       - name: Upload executed notebook as artifact (for debugging)
         if: always()
