@@ -1,0 +1,11 @@
+.venv/
+venv/
+venv/
+/Users/macbookpro/Documents/DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/serve_pyfunc.py
+DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/GiveMeSomeCredit.ipynb
+/Users/macbookpro/Documents/DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/backend/.env
+DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/frontend/.env
+/Users/macbookpro/Documents/DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/frontend/node_modules
+/Users/macbookpro/Documents/DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/backend/.env
+/Users/macbookpro/Documents/DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/backend/GiveMeSomeCredit.ipynb
+src/backend/.env

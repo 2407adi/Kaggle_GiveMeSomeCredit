@@ -1,0 +1,10 @@
+artifact_location: file:///Users/macbookpro/Documents/DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/mlruns/545392083628418778/models/m-ec99c360d2ef4ed4b8b818c78ce9af2d/artifacts
+creation_timestamp: 1755770562259
+experiment_id: '545392083628418778'
+last_updated_timestamp: 1755770564603
+model_id: m-ec99c360d2ef4ed4b8b818c78ce9af2d
+model_type: null
+name: xgb_model
+source_run_id: 919dcb71d14a44119fc133704f71a501
+status: 2
+status_message: null

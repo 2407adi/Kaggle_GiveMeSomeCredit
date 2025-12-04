@@ -1,0 +1,10 @@
+artifact_location: file:///Users/macbookpro/Documents/DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/mlruns/545392083628418778/models/m-27f05a6879694f3b8ec78f6539c264c5/artifacts
+creation_timestamp: 1755770566254
+experiment_id: '545392083628418778'
+last_updated_timestamp: 1755770566281
+model_id: m-27f05a6879694f3b8ec78f6539c264c5
+model_type: null
+name: pyfunc_model
+source_run_id: 919dcb71d14a44119fc133704f71a501
+status: 3
+status_message: null

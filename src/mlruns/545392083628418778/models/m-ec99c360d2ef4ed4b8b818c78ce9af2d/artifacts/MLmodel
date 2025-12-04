@@ -1,0 +1,42 @@
+artifact_path: file:///Users/macbookpro/Documents/DataBricks_Project/Personal_CreditScore/src/Personal_CreditScore/Kaggle_GiveMeSomeCredit/src/mlruns/545392083628418778/models/m-ec99c360d2ef4ed4b8b818c78ce9af2d/artifacts
+flavors:
+  python_function:
+    data: model.xgb
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.12.0
+  xgboost:
+    code: null
+    data: model.xgb
+    model_class: xgboost.sklearn.XGBClassifier
+    model_format: xgb
+    xgb_version: 3.0.4
+is_signature_from_type_hint: false
+mlflow_version: 3.3.1
+model_id: m-ec99c360d2ef4ed4b8b818c78ce9af2d
+model_size_bytes: 333938
+model_uuid: m-ec99c360d2ef4ed4b8b818c78ce9af2d
+prompts: null
+run_id: 919dcb71d14a44119fc133704f71a501
+signature:
+  inputs: '[{"type": "double", "name": "RevolvingUtilizationOfUnsecuredLines", "required":
+    true}, {"type": "long", "name": "age", "required": true}, {"type": "long", "name":
+    "NumberOfTime30-59DaysPastDueNotWorse", "required": true}, {"type": "double",
+    "name": "DebtRatio", "required": true}, {"type": "double", "name": "MonthlyIncome",
+    "required": false}, {"type": "long", "name": "NumberOfOpenCreditLinesAndLoans",
+    "required": true}, {"type": "long", "name": "NumberOfTimes90DaysLate", "required":
+    true}, {"type": "long", "name": "NumberRealEstateLoansOrLines", "required": true},
+    {"type": "long", "name": "NumberOfTime60-89DaysPastDueNotWorse", "required": true},
+    {"type": "double", "name": "NumberOfDependents", "required": false}, {"type":
+    "double", "name": "CreditUtilizationPerLine", "required": true}, {"type": "double",
+    "name": "DebtBurdenPerDependent", "required": false}, {"type": "double", "name":
+    "SeriousDelinqRate", "required": true}, {"type": "double", "name": "RealEstateLoanShare",
+    "required": true}, {"type": "double", "name": "AgePerCreditLine", "required":
+    true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float32", "shape": [-1,
+    2]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-08-21 10:02:42.281139'

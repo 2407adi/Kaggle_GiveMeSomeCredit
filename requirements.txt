@@ -1,0 +1,7 @@
+mlflow
+scikit-learn
+xgboost
+pandas
+numpy
+matplotlib
+scikit-optimize
