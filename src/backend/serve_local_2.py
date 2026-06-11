@@ -1,13 +1,13 @@
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, HTTPException
 import pandas as pd
 import numpy as np
-import nest_asyncio
-import uvicorn
 import os
-import mlflow
+import logging
 import shap
 import base64
 from io import BytesIO
+import matplotlib
+matplotlib.use("Agg")  # headless server: no GUI backend
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,19 +16,21 @@ from openai import OpenAI
 import json
 import re
 from utils import compute_risk_based_rate, calculate_loan_options
+from model_local import LocalCreditRiskModel
+
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
+logger = logging.getLogger("credit-risk")
 
 # Load env
 load_dotenv()
-DATABRICKS_HOST = os.getenv("DATABRICKS_HOST")
-DATABRICKS_TOKEN = os.getenv("DATABRICKS_TOKEN")
-MODEL_URI = os.getenv("MODEL_URI")
 
-# init client
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-os.environ["DATABRICKS_HOST"] = DATABRICKS_HOST
-os.environ["DATABRICKS_TOKEN"] = DATABRICKS_TOKEN
-mlflow.set_registry_uri("databricks-uc")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise RuntimeError(
+        "OPENAI_API_KEY is not set. Add it to src/backend/.env "
+        "(see .env.example) - it is required for the analyst summary."
+    )
+openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 # -------------------------
 # Data: customers + reference + external (Saudi) enrichment
@@ -40,23 +42,29 @@ reference_scores = pd.read_parquet("data/train_predictions.parquet")  # column: 
 # additional enrichment dataframe from Saudi dataset
 try:
     saudi_df = pd.read_csv("data/saudi_lean_customers_enriched.csv")
-    print(saudi_df.columns)
+    logger.info("Loaded Saudi enrichment data: %s columns", len(saudi_df.columns))
 except FileNotFoundError:
     # fallback to empty frame if not present during local dev/testing
     saudi_df = pd.DataFrame()
 
-# Load model
-model = mlflow.pyfunc.load_model(MODEL_URI)
+# Load model from local artifacts baked into the image (see train.py)
+model = LocalCreditRiskModel(os.getenv("MODEL_DIR", "model"))
+logger.info("Loaded local model (trained %s, calibrated test AUC %s)",
+            model.metadata.get("trained_at", "?"),
+            model.metadata.get("calibrated_test_auc", "?"))
 
 app = FastAPI(title="Credit Risk Model (local)")
 
-# Allow frontend
+# Allow frontend; extend via comma-separated ALLOWED_ORIGINS env var
+_default_origins = "http://localhost:5173,http://localhost:8080"
+allowed_origins = [
+    o.strip() for o in os.getenv("ALLOWED_ORIGINS", _default_origins).split(",")
+    if o.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:8080",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -271,7 +279,6 @@ def build_response(X: pd.DataFrame, pred: pd.DataFrame, explainer, row_full: pd.
         #         "Final_Recommendation": "Unavailable",
         #         "AI_Summary": f"(AI summary unavailable: invalid format)"
         #     }
-        print(analyst_output)
         result_json = json.loads(analyst_output)
 
     except Exception as e:
@@ -295,12 +302,12 @@ def build_response(X: pd.DataFrame, pred: pd.DataFrame, explainer, row_full: pd.
 def predict(payload: dict = Body(...)):
     customer_id = payload.get("customer_id")
     if customer_id is None:
-        return {"error": "customer_id is required"}
+        raise HTTPException(status_code=400, detail="customer_id is required")
 
     # locate customer in the new customers dataframe
     row_full = customers_df[customers_df["Identifier"] == customer_id]
     if row_full.empty:
-        return {"error": f"Customer {customer_id} not found"}
+        raise HTTPException(status_code=404, detail=f"Customer {customer_id} not found")
 
     # try to attach enrichment from saudi_lean_customers.csv if available
     if not saudi_df.empty:
@@ -314,31 +321,25 @@ def predict(payload: dict = Body(...)):
 
         if key_col is not None:
             extra = saudi_df[saudi_df[key_col] == customer_id]
-            print(extra.columns)
             if not extra.empty:
                 # ensure we don't accidentally duplicate the index; do a left-merge
                 # use suffixes to avoid collisions
                 row_full = row_full.merge(extra, left_on="Identifier", right_on=key_col, how="left", suffixes=("", "_saudi"))
-                print(row_full.columns)
 
     # only pass model features to model
-    print("done till here")
     X = row_full[MODEL_FEATURES].astype(schema, errors="ignore")
     X, explainer, pred = model.predict(X)
-    print("model pred done")
+    logger.debug("model prediction done for customer %s", customer_id)
 
     # --- New: Risk-based pricing and FOIR-based loan amounts ---
     pd_prob = float(pred.loc[0, "calibrated_probability"])
     apr = compute_risk_based_rate(pd_prob)
-    print("calibration done")
 
     monthly_income = float(row_full["MonthlyIncome"].iloc[0]) if "MonthlyIncome" in row_full else 0.0
     debt_ratio = float(row_full["DebtRatio"].iloc[0]) if "DebtRatio" in row_full else 0.0
     loan_options = calculate_loan_options(monthly_income, debt_ratio, apr)
-    print("calibration done 1")
 
     result = build_response(X, pred, explainer, row_full.iloc[0])
-    print("calibration done 2")
     result["pricing"] = {
     "pd": round(pd_prob, 6),
     "apr_decimal": round(apr, 6),
@@ -355,25 +356,20 @@ def predict_1(payload: dict = Body(...)):
     # synthesize missing features
     row_full = synthesize_bureau_fields(row)
 
-    print("done till here")
-
     # only pass model features to model
     X = row_full[MODEL_FEATURES].astype(schema, errors="ignore")
     X, explainer, pred = model.predict(X)
-    print("model pred done")
-    
+    logger.debug("model prediction done for manual entry")
+
     # --- New: Risk-based pricing and FOIR-based loan amounts ---
     pd_prob = float(pred.loc[0, "calibrated_probability"])
     apr = compute_risk_based_rate(pd_prob)
-    print("calibration done")
 
     monthly_income = float(row_full["MonthlyIncome"].iloc[0]) if "MonthlyIncome" in row_full else 0.0
     debt_ratio = float(row_full["DebtRatio"].iloc[0]) if "DebtRatio" in row_full else 0.0
     loan_options = calculate_loan_options(monthly_income, debt_ratio, apr)
-    print("calibration done 1")
 
     result = build_response(X, pred, explainer, row_full.iloc[0])
-    print("calibration done 2")
     result["pricing"] = {
     "pd": round(pd_prob, 6),
     "apr_decimal": round(apr, 6),
@@ -386,7 +382,3 @@ def predict_1(payload: dict = Body(...)):
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
-def run():
-    nest_asyncio.apply()
-    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,0 +1,40 @@
+{
+  "trained_at": "2026-06-11T15:27:53.382736+00:00",
+  "data": "/Users/adityachauhan/Documents/Claude/Projects/Kaggle_GiveMeSomeCredit/data/cs-training.csv",
+  "n_rows": 150000,
+  "features": [
+    "RevolvingUtilizationOfUnsecuredLines",
+    "age",
+    "NumberOfTime30_59DaysPastDueNotWorse",
+    "DebtRatio",
+    "MonthlyIncome",
+    "NumberOfOpenCreditLinesAndLoans",
+    "NumberOfTimes90DaysLate",
+    "NumberRealEstateLoansOrLines",
+    "NumberOfTime60_89DaysPastDueNotWorse",
+    "NumberOfDependents",
+    "CreditUtilizationPerLine",
+    "DebtBurdenPerDependent",
+    "SeriousDelinqRate",
+    "RealEstateLoanShare",
+    "AgePerCreditLine"
+  ],
+  "params": {
+    "colsample_bylevel": 0.6460623753119883,
+    "colsample_bynode": 0.836635445906395,
+    "colsample_bytree": 0.9597207993087004,
+    "gamma": 3.1579959348704874,
+    "learning_rate": 0.03483618036871094,
+    "max_depth": 4.0,
+    "max_leaves": 90.0,
+    "min_child_weight": 15.0,
+    "n_estimators": 222.0,
+    "reg_alpha": 32.38957941734388,
+    "reg_lambda": 27.498197090489207,
+    "scale_pos_weight": 10.918947649884663,
+    "subsample": 0.5068503510376384
+  },
+  "raw_test_auc": 0.868118,
+  "calibrated_test_auc": 0.868118,
+  "seed": 42
+}

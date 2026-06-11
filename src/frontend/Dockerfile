@@ -2,7 +2,10 @@
 FROM node:18 AS build
 WORKDIR /app
 
-ENV VITE_BACKEND_URL=https://creditrisk-backend.thankfulhill-d4542afa.australiasoutheast.azurecontainerapps.io
+# Vite inlines this at build time; override per environment with
+# `docker build --build-arg VITE_BACKEND_URL=https://<your-backend>`
+ARG VITE_BACKEND_URL=https://creditrisk-backend.thankfulhill-d4542afa.australiasoutheast.azurecontainerapps.io
+ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
 
 # Install dependencies
 COPY package*.json ./
