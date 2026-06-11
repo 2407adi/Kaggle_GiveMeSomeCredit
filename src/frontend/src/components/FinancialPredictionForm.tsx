@@ -155,7 +155,7 @@ export default function FinancialPredictionForm() {
     setResult(null);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/predict`, {
+      const response = await fetch(`${BACKEND_URL}/predict_1`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

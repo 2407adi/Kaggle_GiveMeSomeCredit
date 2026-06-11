@@ -511,7 +511,7 @@ const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
                   <h4 className="font-semibold text-foreground mb-2">Risk-Based Pricing</h4>
 
                   <div className="text-3xl font-bold text-foreground">
-                    {data.pricing.apr_percent
+                    {data.pricing?.apr_percent
                       ? `${data.pricing.apr_percent.toFixed(2)}%`
                       : "—"}
                   </div>

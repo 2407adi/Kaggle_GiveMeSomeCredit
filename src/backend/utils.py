@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from skopt.space import Real, Integer
 
 
 # --- Constants ---
@@ -35,6 +34,8 @@ def to_2d_frame(X):
     raise ValueError("Unsupported input type for predict; pass dict / list[dict] / DataFrame.")
 
 def build_search_space():
+    # Imported here so serving doesn't require scikit-optimize
+    from skopt.space import Real, Integer
     return {
     # --- Learning Parameters ---
     'learning_rate': Real(0.001, 0.1, prior='log-uniform'),  # Smaller range for log-scale

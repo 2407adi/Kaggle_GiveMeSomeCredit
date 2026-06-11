@@ -1,0 +1,14 @@
+# Dev image used by docker-compose.dev.yaml: runs the Vite dev server with
+# the source mounted as a volume for live reload.
+FROM node:18
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 8080
+
+CMD ["npm", "run", "dev", "--", "--host", "--port", "8080"]

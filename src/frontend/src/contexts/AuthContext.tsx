@@ -19,18 +19,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Demo gate only - this is client-side and provides no real security.
+  // Anything shipped to the browser (including these values) is public;
+  // protect real deployments with backend authentication.
   const validateCredentials = async (username: string, password: string): Promise<boolean> => {
-    try {
-      const response = await fetch("/auth-credentials.json");
-      const data = await response.json();
-      
-      return data.credentials.some((cred: any) => 
-        cred.username === username && cred.password === password
-      );
-    } catch (error) {
-      console.error("Error validating credentials:", error);
-      return false;
-    }
+    const demoUsername = import.meta.env.VITE_DEMO_USERNAME || "nu10admin";
+    const demoPassword = import.meta.env.VITE_DEMO_PASSWORD || "admin123";
+    return username === demoUsername && password === demoPassword;
   };
 
   const login = async (username: string, password: string): Promise<boolean> => {
