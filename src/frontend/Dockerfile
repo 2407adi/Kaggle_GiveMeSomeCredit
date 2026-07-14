@@ -2,9 +2,11 @@
 FROM node:18 AS build
 WORKDIR /app
 
-# Vite inlines this at build time; override per environment with
-# `docker build --build-arg VITE_BACKEND_URL=https://<your-backend>`
-ARG VITE_BACKEND_URL=https://creditrisk-backend.thankfulhill-d4542afa.australiasoutheast.azurecontainerapps.io
+# Vite inlines this at build time; ALWAYS pass the real backend URL when
+# building for deployment: `--build-arg VITE_BACKEND_URL=https://<backend-fqdn>`
+# (deploy.sh does this automatically). The localhost default is deliberate so
+# an arg-less build fails loudly instead of silently pointing at a stale host.
+ARG VITE_BACKEND_URL=http://localhost:8000
 ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
 
 # Install dependencies
