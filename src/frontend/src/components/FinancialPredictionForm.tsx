@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, TrendingUp, TrendingDown } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface FormData {
@@ -17,16 +18,6 @@ interface FormData {
   NumberRealEstateLoansOrLines: number | '';
   NumberOfTime60_89DaysPastDueNotWorse: number | '';
   NumberOfDependents: number | '';
-}
-
-interface PredictionResult {
-  prediction?: number;
-  probability?: number;
-  score?: number;
-  percentile?: number;
-  explanations?: string[];
-  features?: Record<string, number>;
-  force_plot?: string;
 }
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
@@ -59,7 +50,7 @@ export default function FinancialPredictionForm() {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<PredictionResult | null>(null);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleInputChange = (field: keyof FormData, value: string) => {
@@ -84,75 +75,12 @@ export default function FinancialPredictionForm() {
     return true;
   };
 
-  const checkIfAllFieldsEmpty = (): boolean => {
-    const requiredFields = Object.keys(formData) as (keyof FormData)[];
-    return requiredFields.every(field => formData[field] === '');
-  };
-
-  const getMockData = () => {
-    return {
-      score: 607.66,
-      percentile: 69.87,
-      explanations: [
-        'Your credit score is positively impacted by 30-59 Days Past Due, Debt Ratio.',
-        'Your credit score is negatively impacted by SeriousDelinqRate, Revolving Utilization.'
-      ],
-      features: {
-        RevolvingUtilizationOfUnsecuredLines: 0.35,
-        age: 45.0,
-        NumberOfTime30_59DaysPastDueNotWorse: 1.0,
-        DebtRatio: 0.65,
-        MonthlyIncome: 5500.0,
-        NumberOfOpenCreditLinesAndLoans: 8.0,
-        NumberOfTimes90DaysLate: 0.0,
-        NumberRealEstateLoansOrLines: 2.0,
-        NumberOfTime60_89DaysPastDueNotWorse: 0.0,
-        NumberOfDependents: 2.0,
-        TotalObligation: 3575.0,
-        TotalUnsecuredLoans: 4.0,
-        TotalSecuredLoans: 4.0,
-        CreditCards: 1.0,
-        PersonalLoans: 1.0,
-        BNPLLoans: 1.0,
-        OtherUnsecured: 1.0,
-        RealEstateLoans: 2.0,
-        GoldLoans: 0.0,
-        VehicleLoans: 1.0,
-        OtherSecured: 1.0,
-        HasDelinquencyHistory: 1.0,
-        DependentsFlag: 1.0,
-        TotalLoanUtilization: 0.52,
-        BureauVintage: 12.0,
-        NumberOfEnquiriesInLast6Months: 24.0
-      },
-      force_plot: "force_plot_b64 string"
-    };
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Check if all fields are empty and use mock data
-    if (checkIfAllFieldsEmpty()) {
-      setIsLoading(true);
-      setResult(null);
-      
-      // Simulate loading time
-      setTimeout(() => {
-        setResult(getMockData());
-        setIsLoading(false);
-        toast({
-          title: "Mock Prediction Complete",
-          description: "Sample financial risk assessment displayed (no data entered).",
-        });
-      }, 1500);
-      return;
-    }
 
     if (!validateForm()) return;
 
     setIsLoading(true);
-    setResult(null);
 
     try {
       const response = await fetch(`${BACKEND_URL}/predict_1`, {
@@ -168,12 +96,8 @@ export default function FinancialPredictionForm() {
       }
 
       const data = await response.json();
-      setResult(data);
-      
-      toast({
-        title: "Prediction Complete",
-        description: "Your financial risk assessment has been processed.",
-      });
+      // Show the full assessment dashboard (AI summary, pricing, offers, ECL)
+      navigate('/results/manual', { state: data });
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
@@ -245,56 +169,6 @@ export default function FinancialPredictionForm() {
           </CardContent>
         </Card>
 
-        {result && (
-          <Card className="shadow-lg border-t-4 border-t-primary">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                {result.prediction === 1 ? (
-                  <TrendingDown className="h-5 w-5 text-destructive" />
-                ) : (
-                  <TrendingUp className="h-5 w-5 text-success" />
-                )}
-                Prediction Result
-              </CardTitle>
-              <CardDescription>
-                Based on the financial information provided
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-muted-foreground">
-                    {result.score ? 'Credit Score' : 'Risk Classification'}
-                  </Label>
-                  <div className={`text-2xl font-bold ${
-                    result.score ? 'text-foreground' : 
-                    result.prediction === 1 ? 'text-destructive' : 'text-success'
-                  }`}>
-                    {result.score ? Math.round(result.score) : 
-                     result.prediction === 1 ? 'High Risk' : 'Low Risk'}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-muted-foreground">
-                    {result.percentile !== undefined ? 'Percentile' : 'Probability Score'}
-                  </Label>
-                  <div className="text-2xl font-bold text-foreground">
-                    {result.percentile !== undefined ? 
-                     `${result.percentile.toFixed(1)}%` : 
-                     `${((result.probability || 0) * 100).toFixed(1)}%`}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-muted rounded-lg p-4">
-                <p className="text-sm text-muted-foreground">
-                  This prediction is based on the financial data you provided. 
-                  The probability score indicates the confidence level of the assessment.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );

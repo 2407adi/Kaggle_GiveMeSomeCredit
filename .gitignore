@@ -12,10 +12,11 @@ __pycache__/
 # MLflow local tracking
 mlruns/
 
-# OS / editor
+# OS / editor / local tooling
 .DS_Store
 .vscode/
 .idea/
+.claude/
 
 # Node
 node_modules/

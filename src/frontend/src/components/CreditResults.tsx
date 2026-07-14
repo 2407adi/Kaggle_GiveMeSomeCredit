@@ -8,6 +8,9 @@ import { useEffect, useState } from "react";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import BaselEclAnalysis from "@/components/BaselEclAnalysis";
+import ThemeToggle from "@/components/ThemeToggle";
+import { useTheme } from "next-themes";
 
 
 // Mock data based on the API responses provided
@@ -116,6 +119,7 @@ interface CreditResultsProps {
 const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
   const navigate = useNavigate();
   const { customerId } = useParams();
+  const { resolvedTheme } = useTheme();
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [animatedScore, setAnimatedScore] = useState(0);
@@ -129,13 +133,9 @@ const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
         return;
       }
 
-      // ✅ Case 2: fetch by customerId or use mock data for preview
-      if (!customerId) {
-        // If no customerId and no passed data, show mock data for manual route
-        if (window.location.pathname.includes('/manual')) {
-          setData(mockPredictData);
-          setIsLoading(false);
-        }
+      // ✅ Case 2: manual-entry route refreshed → navigation state is gone, re-enter the form
+      if (customerId === 'manual' || !customerId) {
+        navigate('/assessment', { replace: true });
         return;
       }
 
@@ -190,9 +190,9 @@ const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
   };
 
   const getRiskCircleColor = (score: number) => {
-    if (score >= 750) return "green";
-    if (score >= 650) return "orange";
-    return "red";
+    if (score >= 750) return "hsl(var(--success))";
+    if (score >= 650) return "hsl(var(--warning))";
+    return "hsl(var(--destructive))";
   };
 
   const getApprovalStatus = (score: number) => {
@@ -262,7 +262,8 @@ const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff'
+        // Match the page background so dark-mode exports stay readable
+        backgroundColor: resolvedTheme === 'dark' ? '#0a1120' : '#ffffff'
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -327,8 +328,9 @@ const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
             <h1 className="text-3xl font-bold text-foreground">Credit Assessment Dashboard</h1>
           </div>
 
-          {/* Right: Export button */}
-          <div className="flex justify-end">
+          {/* Right: Theme toggle + Export button */}
+          <div className="flex justify-end items-center gap-2">
+            <ThemeToggle />
             <Button variant="outline" size="sm" className="border-border" onClick={exportToPDF}>
               <FileText className="h-4 w-4 mr-2" />
               Export Report
@@ -431,7 +433,7 @@ const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
                   </div>
                 </div>
               </div>
-              <Badge className={`${data.score >= 750 ? 'bg-green-500' : data.score >= 650 ? 'bg-yellow-500' : 'bg-red-500'} text-white text-lg px-4 py-2`}>
+              <Badge className={`${data.score >= 750 ? 'bg-success' : data.score >= 650 ? 'bg-warning' : 'bg-destructive'} text-white text-lg px-4 py-2`}>
                 {getRiskLevel(data.score)}
               </Badge>
               <div className="mt-4 text-center">
@@ -554,7 +556,7 @@ const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
                       {data.loan_options.slice(0, 4).map((offer, idx) => (
                         <div
                           key={idx}
-                          className="rounded-lg border bg-background p-3 hover:shadow-sm transition-shadow"
+                          className="rounded-lg border bg-background p-3 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5 transition-all"
                         >
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm font-medium text-muted-foreground">
@@ -586,6 +588,15 @@ const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
           </CardContent>
         </Card>
 
+        {/* Basel ECL & Capital Analysis */}
+        {data.pricing && data.loan_options?.length > 0 && (
+          <BaselEclAnalysis
+            pricing={data.pricing}
+            loanOptions={data.loan_options}
+            features={data.features || {}}
+          />
+        )}
+
         {/* AI Analysis Summary Card */}
         <Card className="border-border shadow-sm">
           <CardHeader className="pb-4 bg-muted/30">
@@ -601,7 +612,7 @@ const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
               {data.Final_Recommendation && (
                 <div>
                   <h4 className="font-semibold text-foreground mb-1">Final Recommendation</h4>
-                  <p className="text-sm text-black">
+                  <p className="text-sm text-foreground">
                     {data.Final_Recommendation}
                   </p>
                 </div>
@@ -838,11 +849,14 @@ const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
               <Dialog>
                 <DialogTrigger asChild>
                   <div className="relative cursor-pointer group">
-                    <img 
-                      src={`data:image/png;base64,${data.force_plot}`}
-                      alt="SHAP Force Plot showing detailed feature contributions to credit score"
-                      className="w-full h-auto rounded-lg object-contain transition-opacity group-hover:opacity-80"
-                    />
+                    {/* Explicit white backing: the matplotlib PNG assumes a white background */}
+                    <div className="bg-white rounded-lg p-2">
+                      <img
+                        src={`data:image/png;base64,${data.force_plot}`}
+                        alt="SHAP Force Plot showing detailed feature contributions to credit score"
+                        className="w-full h-auto rounded-lg object-contain transition-opacity group-hover:opacity-80"
+                      />
+                    </div>
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
                       <div className="bg-white/90 p-2 rounded-full">
                         <Expand className="h-6 w-6 text-gray-700" />
@@ -851,8 +865,8 @@ const CreditResults = ({ apiData: passedData }: CreditResultsProps) => {
                   </div>
                 </DialogTrigger>
                 <DialogContent className="max-w-6xl w-[95vw] h-[90vh] p-4">
-                  <div className="w-full h-full flex items-center justify-center">
-                    <img 
+                  <div className="w-full h-full flex items-center justify-center bg-white rounded-lg">
+                    <img
                       src={`data:image/png;base64,${data.force_plot}`}
                       alt="SHAP Force Plot showing detailed feature contributions to credit score"
                       className="max-w-full max-h-full object-contain"
