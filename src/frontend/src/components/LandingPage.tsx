@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import FinancialDataForm from "@/components/FinancialDataForm";
 import LoginModal from "@/components/LoginModal";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function LandingPage() {
   const [customerId, setCustomerId] = useState("");
@@ -56,25 +57,26 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header with Login */}
-      <header className="absolute top-0 right-0 p-6 z-10">
+      <header className="absolute top-0 right-0 p-6 z-10 flex items-center gap-2">
+        <ThemeToggle />
         {isAuthenticated ? (
-          <Button 
+          <Button
             onClick={logout}
             variant="outline"
             size="sm"
-            className="gap-2 border-slate-300 text-slate-700 hover:bg-slate-100"
+            className="gap-2 border-border"
           >
             <LogOut className="w-4 h-4" />
             Logout
           </Button>
         ) : (
-          <Button 
+          <Button
             onClick={() => setShowLoginModal(true)}
             variant="outline"
             size="sm"
-            className="gap-2 border-slate-300 text-slate-700 hover:bg-slate-100"
+            className="gap-2 border-border"
           >
             <User className="w-4 h-4" />
             Login
@@ -83,14 +85,14 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 px-4">
+      <section className="relative overflow-hidden py-20 px-4 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent">
         <div className="max-w-6xl mx-auto text-center space-y-8">
           <div className="space-y-4">
-            <h1 className="text-4xl md:text-6xl font-bold text-slate-900 leading-tight">
-              <span className="text-blue-600">LendSure</span> - Your Trusted
-              <span className="text-blue-600"> Credit Partner</span>
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight">
+              <span className="text-primary">LendSure</span> - Your Trusted
+              <span className="text-primary"> Credit Partner</span>
             </h1>
-            <p className="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
               Advanced AI-powered credit assessment platform that provides instant, accurate risk evaluation for financial institutions and lenders
             </p>
           </div>
@@ -98,7 +100,7 @@ export default function LandingPage() {
           <div className="max-w-md mx-auto space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="customerId" className="text-lg font-medium text-slate-900">
+                <Label htmlFor="customerId" className="text-lg font-medium text-foreground">
                   Enter Your National ID
                 </Label>
                 <Input
@@ -107,14 +109,14 @@ export default function LandingPage() {
                   placeholder="e.g. 12345"
                   value={customerId}
                   onChange={(e) => setCustomerId(e.target.value)}
-                  className="text-center text-lg h-12 border-slate-300 focus:border-blue-500"
+                  className="text-center text-lg h-12 border-border focus:border-primary"
                   required
                 />
               </div>
               <Button 
                 type="submit" 
                 size="lg" 
-                className="w-full px-8 py-3 text-lg bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full px-8 py-3 text-lg bg-primary hover:bg-primary/90 text-primary-foreground"
                 disabled={isLoading || !customerId.trim()}
               >
                 {isLoading ? "Loading..." : "Get My Credit Score"}
@@ -123,16 +125,16 @@ export default function LandingPage() {
             
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-300"></div>
+                <div className="w-full border-t border-border"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-slate-50 px-4 text-slate-600">or</span>
+                <span className="bg-background px-4 text-muted-foreground">or</span>
               </div>
             </div>
             
             <FinancialDataForm checkAuth={checkAuthAndExecute} />
             
-            <p className="text-sm text-slate-600 text-center">
+            <p className="text-sm text-muted-foreground text-center">
               Instant results • Completely secure
             </p>
           </div>
@@ -140,49 +142,49 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4 bg-card">
         <div className="max-w-6xl mx-auto">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
               Why Choose Our Assessment?
             </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Our cutting-edge technology provides accurate, instant results to help you understand your financial standing
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <Card className="border-border shadow-sm hover:shadow-md transition-shadow duration-300">
               <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
-                  <Clock className="w-8 h-8 text-blue-600" />
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                  <Clock className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900">Instant Results</h3>
-                <p className="text-slate-600">
+                <h3 className="text-xl font-semibold text-foreground">Instant Results</h3>
+                <p className="text-muted-foreground">
                   Get your risk assessment in under 30 seconds with our advanced AI algorithms
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <Card className="border-border shadow-sm hover:shadow-md transition-shadow duration-300">
               <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
-                  <Shield className="w-8 h-8 text-blue-600" />
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                  <Shield className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900">Bank-Grade Security</h3>
-                <p className="text-slate-600">
+                <h3 className="text-xl font-semibold text-foreground">Bank-Grade Security</h3>
+                <p className="text-muted-foreground">
                   Your financial data is protected with enterprise-level encryption and security protocols
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <Card className="border-border shadow-sm hover:shadow-md transition-shadow duration-300">
               <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
-                  <TrendingUp className="w-8 h-8 text-blue-600" />
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                  <TrendingUp className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900">Actionable Insights</h3>
-                <p className="text-slate-600">
+                <h3 className="text-xl font-semibold text-foreground">Actionable Insights</h3>
+                <p className="text-muted-foreground">
                   Receive detailed probability scores and risk classifications to guide your financial decisions
                 </p>
               </CardContent>
@@ -192,44 +194,44 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 px-4 bg-slate-50">
+      <section className="py-16 px-4 bg-background">
         <div className="max-w-4xl mx-auto">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
               How It Works
             </h2>
-            <p className="text-lg text-slate-600">
+            <p className="text-lg text-muted-foreground">
               Simple, fast, and completely secure process
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center space-y-4">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+              <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                 1
               </div>
-              <h3 className="text-lg font-semibold text-slate-900">Enter Your Information</h3>
-              <p className="text-slate-600">
+              <h3 className="text-lg font-semibold text-foreground">Enter Your Information</h3>
+              <p className="text-muted-foreground">
                 Provide basic financial details including debt ratio, income, and credit history
               </p>
             </div>
 
             <div className="text-center space-y-4">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+              <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                 2
               </div>
-              <h3 className="text-lg font-semibold text-slate-900">AI Analysis</h3>
-              <p className="text-slate-600">
+              <h3 className="text-lg font-semibold text-foreground">AI Analysis</h3>
+              <p className="text-muted-foreground">
                 Our advanced machine learning model analyzes your data against thousands of financial patterns
               </p>
             </div>
 
             <div className="text-center space-y-4">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+              <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                 3
               </div>
-              <h3 className="text-lg font-semibold text-slate-900">Get Your Results</h3>
-              <p className="text-slate-600">
+              <h3 className="text-lg font-semibold text-foreground">Get Your Results</h3>
+              <p className="text-muted-foreground">
                 Receive your risk classification and probability score with detailed explanations
               </p>
             </div>
@@ -238,13 +240,13 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4 bg-card">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <div className="space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
               Ready to Know Your Risk?
             </h2>
-            <p className="text-lg text-slate-600">
+            <p className="text-lg text-muted-foreground">
               Join thousands of users who trust our platform for accurate financial assessments
             </p>
           </div>
@@ -253,23 +255,23 @@ export default function LandingPage() {
             <Button 
               onClick={handleScrollToForm}
               size="lg" 
-              className="px-8 py-3 text-lg bg-blue-600 hover:bg-blue-700 text-white"
+              className="px-8 py-3 text-lg bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               Start Your Assessment Now
             </Button>
           </div>
 
-          <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-slate-600 mt-8">
+          <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-muted-foreground mt-8">
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
+              <CheckCircle className="w-4 h-4 text-success" />
               <span>No credit check required</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
+              <CheckCircle className="w-4 h-4 text-success" />
               <span>100% secure & confidential</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
+              <CheckCircle className="w-4 h-4 text-success" />
               <span>Instant results</span>
             </div>
           </div>

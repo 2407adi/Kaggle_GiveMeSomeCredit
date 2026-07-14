@@ -17,6 +17,7 @@ import json
 import re
 from utils import compute_risk_based_rate, calculate_loan_options
 from model_local import LocalCreditRiskModel
+from ecl import compute_ecl_suite
 
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("credit-risk")
@@ -378,6 +379,46 @@ def predict_1(payload: dict = Body(...)):
     result["loan_options"] = loan_options
 
     return result
+
+@app.post("/ecl")
+def ecl_analysis(payload: dict = Body(...)):
+    """IFRS 9 ECL + Basel III capital view of the offered loans.
+
+    Takes fields the frontend already holds from /predict — no model re-run.
+    """
+    try:
+        pd_12m = float(payload["pd"])
+        apr_decimal = float(payload["apr_decimal"])
+        loan_options = payload["loan_options"]
+    except (KeyError, TypeError, ValueError):
+        raise HTTPException(
+            status_code=400,
+            detail="pd, apr_decimal and loan_options are required",
+        )
+    if not (0 < pd_12m < 1):
+        raise HTTPException(status_code=400, detail="pd must be in (0, 1)")
+    if not isinstance(loan_options, list) or not loan_options:
+        raise HTTPException(status_code=400, detail="loan_options must be a non-empty list")
+    for opt in loan_options:
+        if not isinstance(opt, dict) or "tenure_months" not in opt or "approved_loan_amount" not in opt:
+            raise HTTPException(
+                status_code=400,
+                detail="each loan option needs tenure_months and approved_loan_amount",
+            )
+
+    delinquency = payload.get("delinquency") or {}
+    lgd = float(payload.get("lgd") or 0) or None
+    if lgd is not None and not (0 < lgd <= 1):
+        raise HTTPException(status_code=400, detail="lgd must be in (0, 1]")
+    stage_override = payload.get("stage_override")
+    if stage_override is not None and stage_override not in (1, 2, 3):
+        raise HTTPException(status_code=400, detail="stage_override must be 1, 2 or 3")
+
+    kwargs = {"delinquency": delinquency, "stage_override": stage_override}
+    if lgd is not None:
+        kwargs["lgd"] = lgd
+    return compute_ecl_suite(pd_12m, apr_decimal, loan_options, **kwargs)
+
 
 @app.get("/health")
 def health():
