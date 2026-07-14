@@ -3,3 +3,15 @@ __pycache__
 *.log
 .git
 .vscode
+.env
+.env.*
+.DS_Store
+
+# Not needed at runtime - keeps the cloud-build upload and image small.
+# The server reads: data/train_predictions*.parquet, data/saudi_lean_customers*.csv,
+# data/feature_importance.parquet, and model/*.joblib - those must stay.
+data/cs_test.csv
+data/cs_test_synth.csv
+*.ipynb
+*.png
+test_ecl.py

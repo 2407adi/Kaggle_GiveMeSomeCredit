@@ -2,7 +2,9 @@
 
 A production-shaped credit risk platform built on the Kaggle ["Give Me Some Credit"](https://www.kaggle.com/c/GiveMeSomeCredit) dataset: an XGBoost default-probability model with calibrated PDs feeds risk-based loan pricing, affordability-capped offers, SHAP explainability, an AI analyst summary, and a **Basel III / IFRS 9 Expected Credit Loss suite** that computes the provision and regulatory capital a bank must hold to issue each loan.
 
-React + FastAPI, fully Dockerized, deployable to Azure Container Apps with scale-to-zero (~$5/month idle).
+React + FastAPI, fully Dockerized, running on Azure Container Apps with scale-to-zero (~$5/month idle).
+
+**Live demo:** https://creditrisk-frontend.thankfulhill-d4542afa.australiasoutheast.azurecontainerapps.io (demo login: `nu10admin` / `admin123`; first request may take ~20s while the backend cold-starts from zero replicas)
 
 ---
 
@@ -115,22 +117,15 @@ Or with Docker: `cd src && docker compose -f docker-compose.dev.yaml up`.
 
 ## Deployment (Azure Container Apps)
 
-Both images build **in the cloud** via `az acr build` (no local Docker needed) and run on the consumption plan with `--min-replicas 0`, so idle cost is just the container registry (~$5/mo). The model ships inside the backend image; the only runtime secret is the OpenAI key (stored as a Container Apps secret, referenced via `secretref`).
+One command after `az login`:
 
 ```bash
-# backend
-az acr build -r <registry> -t creditrisk-backend:latest src/backend
-az containerapp update -n creditrisk-backend -g <rg> \
-  --image <registry>.azurecr.io/creditrisk-backend:latest
-
-# frontend (backend URL is baked at build time)
-az acr build -r <registry> -t creditrisk-frontend:latest \
-  --build-arg VITE_BACKEND_URL=https://<backend-fqdn> src/frontend
-az containerapp update -n creditrisk-frontend -g <rg> \
-  --image <registry>.azurecr.io/creditrisk-frontend:latest
+./deploy.sh all        # or: backend | frontend
 ```
 
-Set `ALLOWED_ORIGINS=https://<frontend-fqdn>` on the backend app for CORS, and `OPENAI_API_KEY` as a secret (`--secrets openai-api-key=<key>` + `--env-vars OPENAI_API_KEY=secretref:openai-api-key`).
+The script runs the test gates (pytest / vite build) and **aborts on failure**, cloud-builds both images via `az acr build` (no local Docker needed), tags them `<git-sha>-<timestamp>`, and rolls new Container Apps revisions. The frontend build always fetches the *current* backend FQDN, so the baked `VITE_BACKEND_URL` can never go stale. Resource names are configurable via a gitignored `.deploy.env`.
+
+Runtime config on the backend app: `OPENAI_API_KEY` stored as a Container Apps **secret** (referenced via `secretref`, never plaintext) and `ALLOWED_ORIGINS=https://<frontend-fqdn>` for CORS. Both apps run on the consumption plan with `--min-replicas 0` (scale-to-zero), so idle cost is just the container registry (~$5/mo).
 
 ## Engineering notes
 
