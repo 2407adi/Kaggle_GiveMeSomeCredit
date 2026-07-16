@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, TrendingUp, Clock, CheckCircle, LogOut, User } from "lucide-react";
+import { Shield, TrendingUp, Clock, CheckCircle, LogOut, User, Github, Linkedin, Mail } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -278,7 +278,55 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <LoginModal 
+      {/* Footer */}
+      <footer className="py-10 px-4 border-t border-border bg-card">
+        <div className="max-w-6xl mx-auto flex flex-col items-center gap-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            Designed & built by{" "}
+            <span className="font-semibold text-foreground">Aditya Chauhan</span>
+          </p>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://www.linkedin.com/in/aditya-chauhan-10763bb6/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Aditya Chauhan on LinkedIn"
+              className="p-2 rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary/50 hover:-translate-y-0.5 transition-all"
+            >
+              <Linkedin className="w-4 h-4" />
+            </a>
+            <a
+              href="https://github.com/2407adi/Kaggle_GiveMeSomeCredit"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Project source on GitHub"
+              className="p-2 rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary/50 hover:-translate-y-0.5 transition-all"
+            >
+              <Github className="w-4 h-4" />
+            </a>
+            <a
+              href="mailto:2407.adi@gmail.com"
+              aria-label="Email Aditya Chauhan"
+              className="p-2 rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary/50 hover:-translate-y-0.5 transition-all"
+            >
+              <Mail className="w-4 h-4" />
+            </a>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            XGBoost credit scoring · risk-based pricing · Basel III / IFRS 9 ECL ·{" "}
+            <a
+              href="https://github.com/2407adi/Kaggle_GiveMeSomeCredit"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-primary"
+            >
+              view the code
+            </a>
+          </p>
+        </div>
+      </footer>
+
+      <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         onSuccess={handleLoginSuccess}
